@@ -11,7 +11,7 @@ class Product(base):
     __tablename__ = "products"
 
     code_product = Column("Product_Code", Integer, primary_key=True)
-    name = Column("Product_Name", String, nullable=False)
+    name = Column("Product", String, nullable=False)
     description = Column("Description", String)
     stock = Column("Stock", Integer, nullable=False)
     category = Column("Category", String, nullable=False)
@@ -39,4 +39,11 @@ class User(base):
         self.province = province
         self.phone = phone
 
-class item_cart()
+
+class item_cart(base):
+    def __int__(self,product,amount):
+        self.product = product
+        self.amount = amount
+class
+
+
