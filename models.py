@@ -40,10 +40,13 @@ class User(base):
         self.phone = phone
 
 
-class item_cart(base):
-    def __int__(self,product,amount):
+class item_cart:
+    def __int__(self, product, amount):
         self.product = product
         self.amount = amount
-class
 
 
+class cart:
+    def __init__(self, item_cart):
+        self.cart = item_cart
+    def __repr__(self):
