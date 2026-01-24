@@ -52,8 +52,8 @@ class User(base):
 class order(base):
     __tablename__ = "orders"
 
-    id = Column("ID_Order", Integer, primary_key=True, autoincrement=True)
-    user = Column("User_Id", ForeignKey("users.id"))
+    id = Column("id_order", Integer, primary_key=True, autoincrement=True)
+    user = Column("user_id", ForeignKey("users.id"))
     price = Column("total_price", Float)
     status = Column("Status", String, nullable=False)
     payment = Column("Payment", String, nullable=False)
@@ -71,6 +71,7 @@ class cart(base):
     __tablename__ = "cart"
 
     id = Column("ID", Integer, primary_key=True, autoincrement=True)
+    user = Column("user",ForeignKey("users.id"))
     product = Column("Product", String)
     amount = Column("Amount", Integer)
     unit_price = Column("Unit_price", Float)
@@ -85,24 +86,3 @@ class cupom:
     @staticmethod
     def generate_cupom():
         return secrets.token_urlsafe(8)
-
-
-class store:
-    def __init__(self, cupom, User, Order, cart):
-        self.User = User
-        self.Order = Order
-        self.cart = cart
-        self.cupom = cupom
-
-    def register(self, name, email, password, street, city, province, phone):
-        self.User.name = name
-        self.User.email = email
-        self.User.password = password
-        self.User.street = street
-        self.User.city = city
-        self.User.province = province
-        self.User.phone = phone
-
-    def login(self,email, password):
-        self.User.email = email
-        self.User.password = password
