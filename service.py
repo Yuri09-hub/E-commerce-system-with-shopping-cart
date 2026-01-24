@@ -1,6 +1,4 @@
 from models import User, cupom, order, cart
-from sqlalchemy.orm import sessionmaker
-from dependecies import get_session
 
 
 class store:
@@ -19,8 +17,6 @@ class store:
         self.User.province = province
         self.User.phone = phone
 
-    def login(self, email, password, session):
+    def login(self, email, password):
         self.User.email = email
         self.User.password = password
-
-
