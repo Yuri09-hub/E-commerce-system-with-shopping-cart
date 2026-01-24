@@ -1,8 +1,9 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
 from sqlalchemy import Column, Integer, String, Float, ForeignKey
+import secrets
 
-database = create_engine("sqlite:///database.db")
+db = create_engine("sqlite:///database.db")
 
 base = declarative_base()
 
@@ -11,8 +12,8 @@ class Product(base):
     __tablename__ = "products"
 
     code_product = Column("Product_Code", Integer, primary_key=True)
-    price = Column("Price", Float, nullable=False)
-    name = Column("Product", String, nullable=False)
+    price = Column("price", Float, nullable=False)
+    name = Column("product_name", String, nullable=False)
     description = Column("Description", String)
     stock = Column("Stock", Integer, nullable=False)
     category = Column("Category", String, nullable=False)
@@ -23,17 +24,13 @@ class Product(base):
         self.description = description
         self.stock = stock
         self.category = category
-    @staticmethod
-    def search_product(session,code_product):
-        product =
-
 
 
 #User
 class User(base):
     __tablename__ = "users"
 
-    id = Column("ID_User", Integer, primary_key=True, autoincrement=True)
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
     name = Column("Name", String, nullable=False)
     email = Column("Email", String, unique=True, nullable=False)
     password = Column("Password", String, nullable=False)
@@ -52,24 +49,60 @@ class User(base):
         self.phone = phone
 
 
-class item_cart(base):
-
-    def __int__(self, product, amount):
-        self.product = product
-        self.amount = amount
-
-
-class cart:
-    def __init__(self):
-        self.items = []
-
-    def add_item(self, product, amount):
-        self.items.append(item_cart(product, amount))
-
-
 class order(base):
     __tablename__ = "orders"
+
     id = Column("ID_Order", Integer, primary_key=True, autoincrement=True)
     user = Column("User_Id", ForeignKey("users.id"))
-    name = Column("Name_user", ForeignKey("users.name"))
     price = Column("total_price", Float)
+    status = Column("Status", String, nullable=False)
+    payment = Column("Payment", String, nullable=False)
+
+    # item_cart
+
+    def __init__(self, user, payment, status="PENDING", price=0):
+        self.user = user
+        self.status = status
+        self.price = price
+        self.payment = payment
+
+
+class cart(base):
+    __tablename__ = "cart"
+
+    id = Column("ID", Integer, primary_key=True, autoincrement=True)
+    product = Column("Product", String)
+    amount = Column("Amount", Integer)
+    unit_price = Column("Unit_price", Float)
+
+    def __int__(self, product, amount, unit_price):
+        self.product = product
+        self.amount = amount
+        self.unit_price = unit_price
+
+
+class cupom:
+    @staticmethod
+    def generate_cupom():
+        return secrets.token_urlsafe(8)
+
+
+class store:
+    def __init__(self, cupom, User, Order, cart):
+        self.User = User
+        self.Order = Order
+        self.cart = cart
+        self.cupom = cupom
+
+    def register(self, name, email, password, street, city, province, phone):
+        self.User.name = name
+        self.User.email = email
+        self.User.password = password
+        self.User.street = street
+        self.User.city = city
+        self.User.province = province
+        self.User.phone = phone
+
+    def login(self,email, password):
+        self.User.email = email
+        self.User.password = password
