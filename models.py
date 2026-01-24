@@ -23,6 +23,10 @@ class Product(base):
         self.description = description
         self.stock = stock
         self.category = category
+    @staticmethod
+    def search_product(session,code_product):
+        product =
+
 
 
 #User
@@ -61,9 +65,6 @@ class cart:
 
     def add_item(self, product, amount):
         self.items.append(item_cart(product, amount))
-
-    def total(self):
-        return sum(item.subtotal() for item in self.items)
 
 
 class order(base):
