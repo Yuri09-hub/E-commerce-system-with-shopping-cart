@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey
+from sqlalchemy import Column, Integer, String, Float, ForeignKey,Boolean
 import secrets
 
 db = create_engine("sqlite:///database.db")
@@ -34,12 +34,14 @@ class User(base):
     name = Column("Name", String, nullable=False)
     email = Column("Email", String, unique=True, nullable=False)
     password = Column("Password", String, nullable=False)
-    street = Column("Street", String, nullable=False)
-    city = Column("City", String, nullable=False)
+    street = Column("Street", String)
+    city = Column("City", String)
     province = Column("Province", String, nullable=False)
     phone = Column("Phone", String)
+    admin = Column("admin",Boolean,default=False)
+    active = Column("active",Boolean)
 
-    def __init__(self, name, email, password, street, city, province, phone):
+    def __init__(self, name, email, password, street, city, province, phone,active =True):
         self.name = name
         self.email = email
         self.password = password
@@ -47,6 +49,7 @@ class User(base):
         self.city = city
         self.province = province
         self.phone = phone
+        self.active = active
 
 
 class order(base):
@@ -56,7 +59,7 @@ class order(base):
     user = Column("user_id", ForeignKey("users.id"))
     price = Column("total_price", Float)
     status = Column("Status", String, nullable=False)
-    payment = Column("Payment", String, nullable=False)
+    payment = Column("payment", String, nullable=False)
 
     # item_cart
 
@@ -70,11 +73,11 @@ class order(base):
 class cart(base):
     __tablename__ = "cart"
 
-    id = Column("ID", Integer, primary_key=True, autoincrement=True)
-    user = Column("user",ForeignKey("users.id"))
+    id = Column("id_cart", Integer, primary_key=True, autoincrement=True)
+    user = Column("user", ForeignKey("users.id"))
     product = Column("Product", String)
-    amount = Column("Amount", Integer)
-    unit_price = Column("Unit_price", Float)
+    amount = Column("amount", Integer)
+    unit_price = Column("unit_price", Float)
 
     def __int__(self, product, amount, unit_price):
         self.product = product
