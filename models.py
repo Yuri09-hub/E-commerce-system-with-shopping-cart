@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine
-from sqlalchemy.orm import declarative_base
-from sqlalchemy import Column, Integer, String, Float, ForeignKey,Boolean
+from sqlalchemy.orm import declarative_base, Relationship
+from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean
 import secrets
 
 db = create_engine("sqlite:///database.db")
@@ -38,10 +38,10 @@ class User(base):
     city = Column("City", String)
     province = Column("Province", String, nullable=False)
     phone = Column("Phone", String)
-    admin = Column("admin",Boolean,default=False)
-    active = Column("active",Boolean)
+    admin = Column("admin", Boolean, default=False)
+    active = Column("active", Boolean)
 
-    def __init__(self, name, email, password, street, city, province, phone,active =True):
+    def __init__(self, name, email, password, street, city, province, phone, admin=False, active=True):
         self.name = name
         self.email = email
         self.password = password
@@ -50,6 +50,7 @@ class User(base):
         self.province = province
         self.phone = phone
         self.active = active
+        self.admin = admin
 
 
 class order(base):
@@ -60,6 +61,7 @@ class order(base):
     price = Column("total_price", Float)
     status = Column("Status", String, nullable=False)
     payment = Column("payment", String, nullable=False)
+    items = Relationship("cart", cascade="all, delete")
 
     # item_cart
 
@@ -68,6 +70,9 @@ class order(base):
         self.status = status
         self.price = price
         self.payment = payment
+
+    def calculate_total_price(self):
+        return sum(item.unit_price * item.amount for item in self.items)
 
 
 class cart(base):
