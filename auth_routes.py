@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from models import User
 from dependecies import get_session
 from main import becrypt_context
-from re import compile
+from re import compile,findall
 
 auth_routes = APIRouter(prefix="/auth", tags=["Auth"])
 
@@ -20,11 +20,18 @@ async def create_account(user_schemas: UserSchema,session: Session = Depends(get
     if user:
         raise HTTPException(status_code=400, detail="User already registered")
     else:
-        encrypted_password = becrypt_context.hash(user_schemas.password)
+        check = compile(".@gmail.com")
+        check2 = check.findall(user_schemas.email)
+        check3 = compile(r"\D")
+        check4 = check3.findall(user_schemas.phone)
+        if check2 and not check4:
+            encrypted_password = becrypt_context.hash(user_schemas.password)
+            new_user = User(user_schemas.name, user_schemas.email, encrypted_password,
+                            user_schemas.street, user_schemas.city,
+                            user_schemas.province, user_schemas.phone,
+                            user_schemas.admin, user_schemas.active)
+            session.add(new_user)
+            session.commit()
+        else:
+            raise HTTPException(status_code=400, detail="Bad Request")
 
-        new_user = User(user_schemas.name, user_schemas.email, encrypted_password,
-                        user_schemas.street,user_schemas.city,
-                        user_schemas.province,user_schemas.phone,
-                        user_schemas.admin,user_schemas.active)
-        session.add(new_user)
-        session.commit()
