@@ -6,10 +6,10 @@ class UserSchema(BaseModel):
     name: str
     email: str
     password: str
-    street: Optional[str]
+    street: str
     city: str
     province: str
-    phone: Optional[int]
+    phone: str
     active: Optional[bool]
     admin: Optional[bool]
 

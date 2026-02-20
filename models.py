@@ -41,7 +41,7 @@ class User(base):
     admin = Column("admin", Boolean, default=False)
     active = Column("active", Boolean)
 
-    def __init__(self, name, email, password, street, city, province, phone,active=True,admin=False):
+    def __init__(self, name, email, password, street, city, province, phone, active=True, admin=False):
         self.name = name
         self.email = email
         self.password = password
@@ -61,7 +61,6 @@ class order(base):
     price = Column("total_price", Float)
     status = Column("Status", String, nullable=False)
     payment = Column("payment", String, nullable=False)
-    items = Relationship("cart", cascade="all, delete")
 
     # item_cart
 
@@ -81,7 +80,7 @@ class cart(base):
     id = Column("id_cart", Integer, primary_key=True, autoincrement=True)
     user = Column("user", ForeignKey("users.id"))
     product = Column("Product", String)
-    amount = Column("amount", Integer)
+    #amount = Column("amount", Integer)
     unit_price = Column("unit_price", Float)
 
     def __int__(self, product, amount, unit_price):
