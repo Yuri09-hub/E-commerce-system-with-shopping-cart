@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException
+from fastapi.security import OAuth2PasswordRequestForm
 from schemas import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 from models import User
@@ -12,9 +13,9 @@ from datetime import timedelta, datetime, timezone
 auth_routes = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-def creat_token(id):
-    date_expiretation = datetime.now(timezone.utc) + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE)
-    dict_inf = {"sub": str(id), "expiretation": int(date_expiretation.timestamp())}
+def creat_token(id,duration_token = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE) ):
+    date_expiretation = datetime.now(timezone.utc) + duration_token
+    dict_inf = {"sub": id, "expiretation": date_expiretation.timestamp()}
     jwt_token = jwt.encode(dict_inf, SECRET_KEY, ALGORITHM)
     return jwt_token
 
@@ -65,7 +66,26 @@ async def login(login_schemas: LoginSchema, session: Session = Depends(get_sessi
         raise HTTPException(status_code=400, detail="User does not exist or invalid credentials")
     else:
         access_token = creat_token(user.id)
+        refresh_token = creat_token(user.id, duration_token=timedelta(days=7))
+        return {
+            "access_token": access_token,
+            "refresh_token": refresh_token,
+            "token_type": "bearer"
+        }
+
+
+@auth_routes.post("/login-form")
+async def login_form(form_data: OAuth2PasswordRequestForm = Depends(),session: Session= get_session()):
+    user = authenticate_user(form_data.username, form_data.password,session)
+    if not user:
+        raise HTTPException(status_code=400, detail="User does not exist or invalid credentials")
+    else:
+        access_token = creat_token(user.id)
         return {
             "access_token": access_token,
             "token_type": "bearer"
         }
+
+
+#@auth_routes.get("/refresh")
+#async def user_refresh_token(token):

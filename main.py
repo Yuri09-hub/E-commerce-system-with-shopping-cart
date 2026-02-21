@@ -18,6 +18,7 @@ ACCESS_TOKEN_EXPIRE_MINUTE = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTE"))
 
 becrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login-form")
 
 from auth_routes import auth_routes
 from order_routes import order_routes
