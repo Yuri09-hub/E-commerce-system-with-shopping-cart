@@ -80,7 +80,7 @@ class cart(base):
     id = Column("id_cart", Integer, primary_key=True, autoincrement=True)
     user = Column("user", ForeignKey("users.id"))
     product = Column("Product", String)
-    #amount = Column("amount", Integer)
+    amount = Column("amount", Integer)
     unit_price = Column("unit_price", Float)
 
     def __int__(self, product, amount, unit_price):

@@ -15,3 +15,32 @@ class UserSchema(BaseModel):
 
     class Config:
         from_attributes = True
+
+
+class productSchema(BaseModel):
+    price: float
+    name: str
+    description: str
+    stock: int
+    category: str
+
+    class Config:
+        from_attributes = True
+
+
+class cartSchema(BaseModel):
+    product: str
+    amount: int
+    unit_price: int
+
+    class Config:
+        from_attributes = True
+
+
+#login
+class LoginSchema(BaseModel):
+    email: str
+    password: str
+
+    class config:
+        from_attributes = True
