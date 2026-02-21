@@ -1,6 +1,10 @@
 from fastapi import FastAPI
 from passlib.context import CryptContext
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
 app = FastAPI()
 
 SECRET_KEY = os.getenv("SECRET_KEY")

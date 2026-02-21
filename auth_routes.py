@@ -25,11 +25,13 @@ async def create_account(user_schemas: UserSchema, session: Session = Depends(ge
         check3 = compile(r"\D")
         check4 = check3.findall(user_schemas.phone)
         if check2 and not check4:
-            new_user = User(user_schemas.name, user_schemas.email, user_schemas.password,
+            password_crypt = becrypt_context.hash(user_schemas.password)
+            new_user = User(user_schemas.name, user_schemas.email,password_crypt,
                             user_schemas.street, user_schemas.city,
                             user_schemas.province, user_schemas.phone,
-                            user_schemas.admin, user_schemas.active)
+                            user_schemas.active,user_schemas.admin)
             session.add(new_user)
             session.commit()
+            return {"message": "Account created successfully."}
         else:
             raise HTTPException(status_code=400, detail="Bad Request")
