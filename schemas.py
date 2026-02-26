@@ -44,3 +44,13 @@ class LoginSchema(BaseModel):
 
     class config:
         from_attributes = True
+
+
+#cart
+class CartSchema(BaseModel):
+    product: str
+    amount: int
+    unit_price: int
+
+    class Config:
+        from_attributes = True

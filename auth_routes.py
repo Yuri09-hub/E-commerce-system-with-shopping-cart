@@ -3,17 +3,34 @@ from fastapi.security import OAuth2PasswordRequestForm
 from schemas import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 from models import User
-from dependecies import get_session
+from dependecies import get_session, verify_token
 from main import becrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTE, SECRET_KEY
 from re import compile
-from jose import jwt, JWTError
+from jose import jwt
 from datetime import timedelta, datetime, timezone
-
 
 auth_routes = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-def creat_token(id,duration_token = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE) ):
+def verify_email(email):
+    check = compile(".@gmail.com")
+    check2 = check.findall(email)
+    if check2:
+        return True
+    else:
+        return False
+
+
+def verify_number(phone):
+    check3 = compile(r"\D")
+    check4 = check3.findall(phone)
+    if not check4 and len(phone) == 9:
+        return True
+    else:
+        return False
+
+
+def creat_token(id, duration_token=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE)):
     date_expiretation = datetime.now(timezone.utc) + duration_token
     dict_inf = {"sub": id, "expiretation": date_expiretation.timestamp()}
     jwt_token = jwt.encode(dict_inf, SECRET_KEY, ALGORITHM)
@@ -41,12 +58,7 @@ async def create_account(user_schemas: UserSchema, session: Session = Depends(ge
     if user:
         raise HTTPException(status_code=400, detail="User already registered")
     else:
-        check = compile(".@gmail.com")
-        check2 = check.findall(user_schemas.email)
-        check3 = compile(r"\D")
-        check4 = check3.findall(user_schemas.phone)
-
-        if check2 and not check4 and len(user_schemas.phone) == 9:
+        if verify_email(user_schemas.email) and verify_number(user_schemas.phone):
             password_crypt = becrypt_context.hash(user_schemas.password)
             new_user = User(user_schemas.name, user_schemas.email, password_crypt,
                             user_schemas.street, user_schemas.city,
@@ -75,8 +87,8 @@ async def login(login_schemas: LoginSchema, session: Session = Depends(get_sessi
 
 
 @auth_routes.post("/login-form")
-async def login_form(form_data: OAuth2PasswordRequestForm = Depends(),session: Session= get_session()):
-    user = authenticate_user(form_data.username, form_data.password,session)
+async def login_form(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = get_session()):
+    user = authenticate_user(form_data.username, form_data.password, session)
     if not user:
         raise HTTPException(status_code=400, detail="User does not exist or invalid credentials")
     else:
@@ -87,5 +99,10 @@ async def login_form(form_data: OAuth2PasswordRequestForm = Depends(),session: S
         }
 
 
-#@auth_routes.get("/refresh")
-#async def user_refresh_token(token):
+@auth_routes.get("/refresh")
+async def user_refresh_token(user: User = Depends(verify_token())):
+    access_token = creat_token(user.id)
+    return {
+        "access_token": access_token,
+        "token_type": "bearer"
+    }

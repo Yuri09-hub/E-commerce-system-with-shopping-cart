@@ -1,9 +1,8 @@
 from fastapi import APIRouter, Depends, HTTPException
-from schemas import  productSchema,LoginSchema
-from dependecies import get_session
+from schemas import productSchema
+from dependecies import get_session, verify_token
 from sqlalchemy.orm import Session
-from auth_routes import authenticate_user
-from models import Product
+from models import Product, User
 
 product_routes = APIRouter(prefix="/product", tags=["product"])
 
@@ -14,11 +13,10 @@ async def product():
 
 
 @product_routes.post("/add_product")
-async def add_product(login_schemas: LoginSchema, product_schemas: productSchema,
+async def add_product(product_schemas: productSchema, user: User = Depends(verify_token()),
                       session: Session = Depends(get_session)):
-    user = authenticate_user(login_schemas.email, login_schemas.password, session)
     if not user.admin:
-        raise HTTPException(status_code=400, detail="You do not have permission to make this.")
+        raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
     else:
         product = Product(product_schemas.price, product_schemas.name,
                           product_schemas.stock, product_schemas.category,
