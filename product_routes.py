@@ -13,7 +13,7 @@ async def product():
 
 
 @product_routes.post("/add_product")
-async def add_product(product_schemas: productSchema, user: User = Depends(verify_token()),
+async def add_product(product_schemas: productSchema, user: User = Depends(verify_token),
                       session: Session = Depends(get_session)):
     if not user.admin:
         raise HTTPException(status_code=401, detail="You do not have permission to make this change.")

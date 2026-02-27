@@ -31,7 +31,6 @@ class productSchema(BaseModel):
 class cartSchema(BaseModel):
     product: str
     amount: int
-    unit_price: int
 
     class Config:
         from_attributes = True
@@ -50,7 +49,15 @@ class LoginSchema(BaseModel):
 class CartSchema(BaseModel):
     product: str
     amount: int
-    unit_price: int
+    unit_price: float
+
+    class Config:
+        from_attributes = True
+
+
+class OrderSchema(BaseModel):
+    user: int
+    payment: str
 
     class Config:
         from_attributes = True

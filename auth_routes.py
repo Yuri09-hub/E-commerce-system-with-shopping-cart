@@ -37,7 +37,7 @@ def creat_token(id, duration_token=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE)
     return jwt_token
 
 
-def authenticate_user(email, password, session):
+def authenticate_user(email, password, session: Session = Depends(get_session)):
     user = session.query(User).filter(User.email == email).first()
     if not user:
         return False
@@ -86,8 +86,8 @@ async def login(login_schemas: LoginSchema, session: Session = Depends(get_sessi
         }
 
 
-@auth_routes.post("/login-form")
-async def login_form(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = get_session()):
+@auth_routes.post("/login-form",response_model=None)
+async def login_form(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
     user = authenticate_user(form_data.username, form_data.password, session)
     if not user:
         raise HTTPException(status_code=400, detail="User does not exist or invalid credentials")
@@ -100,7 +100,7 @@ async def login_form(form_data: OAuth2PasswordRequestForm = Depends(), session: 
 
 
 @auth_routes.get("/refresh")
-async def user_refresh_token(user: User = Depends(verify_token())):
+async def user_refresh_token(user: User = Depends(verify_token)):
     access_token = creat_token(user.id)
     return {
         "access_token": access_token,
