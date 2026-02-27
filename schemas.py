@@ -22,14 +22,12 @@ class productSchema(BaseModel):
     name: str
     description: str
     stock: int
-    category: str
 
     class Config:
         from_attributes = True
 
 
 class cartSchema(BaseModel):
-    product: str
     amount: int
 
     class Config:
@@ -45,19 +43,8 @@ class LoginSchema(BaseModel):
         from_attributes = True
 
 
-#cart
-class CartSchema(BaseModel):
-    product: str
-    amount: int
-    unit_price: float
-
-    class Config:
-        from_attributes = True
-
-
 class OrderSchema(BaseModel):
     user: int
-    payment: str
 
     class Config:
         from_attributes = True

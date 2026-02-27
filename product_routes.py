@@ -18,9 +18,18 @@ async def add_product(product_schemas: productSchema, user: User = Depends(verif
     if not user.admin:
         raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
     else:
-        product = Product(product_schemas.price, product_schemas.name,
-                          product_schemas.stock, product_schemas.category,
-                          product_schemas.description)
+        product = Product(price=product_schemas.price, name=product_schemas.name,
+                          stock=product_schemas.stock, description=product_schemas.description)
+
         session.add(product)
         session.commit()
         return {"message": "Product added successfully"}
+
+
+@product_routes.get("product/list_products")
+async def list_products(session: Session = Depends(get_session)):
+    products = session.query(Product).all()
+
+    return {
+        "products": products
+    }

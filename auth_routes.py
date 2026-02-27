@@ -32,7 +32,7 @@ def verify_number(phone):
 
 def creat_token(id, duration_token=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTE)):
     date_expiretation = datetime.now(timezone.utc) + duration_token
-    dict_inf = {"sub": id, "expiretation": date_expiretation.timestamp()}
+    dict_inf = {"sub": str(id), "exp": int(date_expiretation.timestamp())}
     jwt_token = jwt.encode(dict_inf, SECRET_KEY, ALGORITHM)
     return jwt_token
 
@@ -86,7 +86,7 @@ async def login(login_schemas: LoginSchema, session: Session = Depends(get_sessi
         }
 
 
-@auth_routes.post("/login-form",response_model=None)
+@auth_routes.post("/login-form", response_model=None)
 async def login_form(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
     user = authenticate_user(form_data.username, form_data.password, session)
     if not user:
