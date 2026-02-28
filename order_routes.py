@@ -39,9 +39,9 @@ async def cancel_Order(ordr_id: int, session: Session = Depends(get_session),
 
 
 @order_routes.post("/order/Cart/Add_Item")
-async def add_item_Cart(id: int, cart_schema: cartSchema, session: Session = Depends(get_session),
+async def add_item_Cart(product_id: int, cart_schema: cartSchema, session: Session = Depends(get_session),
                         user: User = Depends(verify_token)):
-    item = session.query(Product).filter(id == Product.code_product).first()
+    item = session.query(Product).filter(product_id == Product.code_product).first()
     if not item:
         raise HTTPException(status_code=400, detail="Product not found")
     elif item.stock < cart_schema.amount:
@@ -60,7 +60,7 @@ async def add_item_Cart(id: int, cart_schema: cartSchema, session: Session = Dep
     }
 
 
-@order_routes.get("/orders/view_my_cart")
+@order_routes.get("/order/view_my_cart")
 async def view_my_cart(session: Session = Depends(get_session), user: User = Depends(verify_token)):
     Cart_item = session.query(cart).filter(cart.user == user.id).all()
     return {
@@ -68,3 +68,15 @@ async def view_my_cart(session: Session = Depends(get_session), user: User = Dep
         "name": user.name,
         "cart": Cart_item
     }
+
+
+@order_routes.post("/order/remover_item_cart")
+async def remover_item_cart(cart_id: int, session: Session = Depends(get_session),
+                            user: User = Depends(verify_token)):
+    cart_item = session.query(cart).filter(cart.id == cart_id).first()
+    if not cart_item:
+        raise HTTPException(status_code=400, detail="product not found or user whithout permission")
+    elif not user.admin or cart_item.user != user:
+        raise HTTPException(status_code=400, detail="You do not have permission to make this change")
+
+

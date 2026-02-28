@@ -25,7 +25,6 @@ class Product(base):
         self.stock = stock
 
 
-
 #User
 class User(base):
     __tablename__ = "users"
@@ -83,7 +82,7 @@ class cart(base):
     amount = Column("amount", Integer)
     unit_price = Column("unit_price", Float)
 
-    def __int__(self, product, amount, unit_price,user):
+    def __int__(self, product, amount, unit_price, user):
         self.product = product
         self.amount = amount
         self.unit_price = unit_price
@@ -93,10 +92,16 @@ class cart(base):
 class cupom(base):
     __tablename__ = "cupom"
     id = Column("id_cupom", Integer, primary_key=True, autoincrement=True)
-    code = Column("code",String,nullable=False)
+    code = Column("code", String, nullable=False)
     user = Column("user", ForeignKey("users.id"))
     discount = Column("discount", Float, nullable=False)
     valid_until = Column("valid_until", DateTime, nullable=False)
+
+    def __init__(self, code, discount, valid_until, user):
+        self.code = code
+        self.discount = discount
+        self.valid_until = valid_until
+        self.user = user
 
     def is_valid(self):
         now = datetime.now()
