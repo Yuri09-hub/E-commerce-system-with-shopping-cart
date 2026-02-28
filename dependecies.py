@@ -44,6 +44,6 @@ def verify_province(province):
         "Namibe", "Uíge",
         "Zaire"]
     if province in province_angola:
-        return True
+        return province
     else:
-        return False
+        return None
