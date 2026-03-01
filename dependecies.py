@@ -37,7 +37,7 @@ def verify_province(province):
         "Cuando", "Cuanza Norte", "Cuanza Sul",
         "Cubango",  # Nova província (ex-Cuando Cubango)
         "Cunene", "Huambo", "Huíla",
-        "Ícolo e Bengo",  # Nova província (ex-Luanda)
+        "Ícolo E Bengo",  # Nova província (ex-Luanda)
         "Luanda", "Lunda Norte", "Lunda Sul",
         "Malanje", "Moxico",
         "Moxico Leste",  # Nova província (ex-Moxico)
@@ -45,5 +45,22 @@ def verify_province(province):
         "Zaire"]
     if province in province_angola:
         return province
+    else:
+        return None
+
+
+def calculate_freight(province):
+    fees = {
+        "Luanda": 1500, "Icolo e Bengo": 2500, "Bengo": 3000,
+        "Benguela": 4000, "Bié": 4500, "Cabinda": 7500,
+        "Cuando": 6500, "Cubango": 6500, "Cuanza Norte": 3500,
+        "Cuanza Sul": 3500, "Cunene": 6000, "Huambo": 4500,
+        "Huíla": 5500, "Lunda Norte": 6500, "Lunda Sul": 6500,
+        "Malanje": 4000, "Moxico": 6000, "Moxico Leste": 7000,
+        "Namibe": 6000, "Uíge": 4500, "Zaire": 4500
+    }
+
+    if province in fees:
+        return fees.get(province)
     else:
         return None

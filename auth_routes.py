@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from schemas import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 from models import User
-from dependecies import get_session, verify_token
+from dependecies import get_session, verify_token, verify_province
 from main import becrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTE, SECRET_KEY
 from re import compile
 from jose import jwt
@@ -58,11 +58,13 @@ async def create_account(user_schemas: UserSchema, session: Session = Depends(ge
     if user:
         raise HTTPException(status_code=400, detail="User already registered")
     else:
-        if verify_email(user_schemas.email) and verify_number(user_schemas.phone):
+        if (verify_email(user_schemas.email) and verify_number(user_schemas.phone) and
+                verify_province(user_schemas.province.title())):
+
             password_crypt = becrypt_context.hash(user_schemas.password)
-            new_user = User(user_schemas.name, user_schemas.email, password_crypt,
-                            user_schemas.street, user_schemas.city,
-                            user_schemas.province, user_schemas.phone,
+            new_user = User(user_schemas.name.title(), user_schemas.email, password_crypt,
+                            user_schemas.street.title(), user_schemas.city,
+                            user_schemas.province.title(), user_schemas.phone,
                             user_schemas.active, user_schemas.admin)
             session.add(new_user)
             session.commit()

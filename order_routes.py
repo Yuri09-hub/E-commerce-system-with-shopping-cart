@@ -8,7 +8,7 @@ order_routes = APIRouter(prefix="/orders", tags=["Orders"])
 
 
 @order_routes.get("/")
-async def order():
+async def Order():
     return {"message": "Order route created"}
 
 
@@ -44,13 +44,53 @@ async def remover_item_cart(cart_id: int, session: Session = Depends(get_session
         raise HTTPException(status_code=400, detail="You do not have permission to make this change")
 
 
+@order_routes.get("/order/view_my_cart")
+async def view_my_cart(session: Session = Depends(get_session), user: User = Depends(verify_token)):
+    Cart_item = session.query(cart).filter(cart.user == user.id).all()
+    return {
+        "user": user.id,
+        "name": user.name,
+        "cart": Cart_item
+    }
+
 
 @order_routes.post("/order/Creat_Order")
-async def Creat_Order(order_schema: OrderSchema, session: Session = Depends(get_session)):
-    new_order = order(user=order_schema.user)
-    session.add(new_order)
+async def Creat_Order(session: Session = Depends(get_session),
+                      user: User = Depends(verify_token)):
+    price = 0
+    item_order = session.query(cart).filter(cart.user == user.id).all()
+    if not item_order:
+        raise HTTPException(status_code=400, detail="item(s) not found")
+    if not user.admin:
+        raise HTTPException(status_code=400, detail="You do not have permission to make this change")
+
+    for item in item_order:
+        new_order = order(user=item.user, price=(item.unit_price * item.amount))
+
+        price += new_order.price
+        session.add(new_order)
+
+    session.query(cart).filter(cart.user == user.id).delete()
     session.commit()
-    return {"message": "Order created"}
+    orders = session.query(order).all()
+    return {"message": "Order created",
+            "user": user.id,
+            "name": user.name,
+            "order": orders,
+            "total": price
+            }
+
+
+@order_routes.get("/order/view_my_order")
+async def view_my_order(user_id: int, session: Session = Depends(get_session),
+                        user: User = Depends(verify_token)):
+    order_user = session.query(order).filter(order.user == user_id).all()
+    if not order_user:
+        raise HTTPException(status_code=400, detail="Order not found")
+    elif not user.admin or not user:
+        raise HTTPException(status_code=400, detail="You do not have permission to make this change")
+
+    return order_user
 
 
 @order_routes.post("/order/cancel/order")
@@ -61,21 +101,10 @@ async def cancel_Order(ordr_id: int, session: Session = Depends(get_session),
         raise HTTPException(status_code=400, detail="Order not found")
     elif not user.admin and order_user.user != user:
         raise HTTPException(status_code=400, detail="You do not have permission to make this change.")
-
+    elif order_user.status == "CANCELLED":
+        raise HTTPException(status_code=400, detail="Order already canceled")
     order_user.status = "CANCELLED"
     session.commit()
-
     return {
         "message": f"Order ID:{ordr_id} successfully canceled",
-        "order": order_user
-    }
-
-
-@order_routes.get("/order/view_my_cart")
-async def view_my_cart(session: Session = Depends(get_session), user: User = Depends(verify_token)):
-    Cart_item = session.query(cart).filter(cart.user == user.id).all()
-    return {
-        "user": user.id,
-        "name": user.name,
-        "cart": Cart_item
     }
