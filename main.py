@@ -9,6 +9,8 @@ load_dotenv()
 
 app = FastAPI()
 
+#nunca envia a secret key para o github, semppre coloque no .gitignore
+
 SECRET_KEY = os.getenv("SECRET_KEY")
 
 #jwt

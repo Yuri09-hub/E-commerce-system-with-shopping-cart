@@ -21,7 +21,7 @@ class productSchema(BaseModel):
     price: float
     name: str
     description: str
-    stock: int
+    stock: int #erro, já comentei isso em outro arquivo
 
     class Config:
         from_attributes = True

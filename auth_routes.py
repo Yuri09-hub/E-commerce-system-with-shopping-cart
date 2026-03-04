@@ -12,7 +12,8 @@ from datetime import timedelta, datetime, timezone
 auth_routes = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-def verify_email(email):
+def verify_email(email):  #nome errado, isso deveria ser uma função de validação de email, e não uma função de verificação de email
+#validar é uma coisa e verificar é outra
     check = compile(".@gmail.com")
     check2 = check.findall(email)
     if check2:
@@ -24,7 +25,14 @@ def verify_email(email):
 def verify_number(phone):
     check3 = compile(r"\D")
     check4 = check3.findall(phone)
-    if not check4 and len(phone) == 9:
+    if not check4 and len(phone) == 9: #erro, o telefone pode ter mais de 9 dígitos, e não só 9
+    #o ideal é usar uma expressão regular para validar o telefone
+    #ex: check3 = compile(r"\D")
+    #ex: check4 = check3.findall(phone)
+    #ex: if not check4 and len(phone) == 9:
+    #ex: return True
+    #ex: else:
+        #ex: return False
         return True
     else:
         return False

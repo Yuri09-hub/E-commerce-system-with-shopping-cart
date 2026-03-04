@@ -46,4 +46,14 @@ def verify_province(province):
     if province in province_angola:
         return province
     else:
-        return None
+        return None  # Invés de retornar None, Deveria retornar província desconhecida ou um erro http 400 com a mensagem "Província desconhecida"
+     
+
+
+
+
+
+
+
+
+

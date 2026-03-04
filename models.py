@@ -16,7 +16,10 @@ class Product(base):
     price = Column("price", Float, nullable=False)
     name = Column("product_name", String, nullable=False)
     description = Column("Description", String)
-    stock = Column("Stock", Integer, nullable=False)
+    stock = Column("Stock", Integer, nullable=False) #modelagem errada, dados dinâmicos não devem ser armazenados como uma coluna fixa, isso erro de modelagem e normalização de dados
+    #precisavas de 2 tabelas separadas, uma para entradas e outra para saidas, e usar a chave estrangeira para relacionar as tabelas
+    #desse jeito a tua modelagem está errada e não está normalizada
+
 
     def __init__(self, price, name, stock, description=""):
         self.price = price
