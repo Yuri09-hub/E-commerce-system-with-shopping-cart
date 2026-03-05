@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
+from sqlalchemy.sql.functions import cume_dist
+
 from models import User, cart, order, Product, product_entry, product_output, cupom
 from schemas import cartSchema, productSchema, UserSchema, OrderSchema
 from sqlalchemy.exc import IntegrityError
@@ -36,7 +38,24 @@ async def Creat_Order(session: Session = Depends(get_session),
             }
 
 
-@order_routes.get("/order/view_my_order")
+@order_routes.post("order/use_coupon")
+async def use_coupon(cupom_id: int, code: str, order_id, session: Session = Depends(get_session),
+                     user: User = Depends(verify_token)):
+    find_coupon = session.query(cupom).filter(cupom.code == code, cupom.id == cupom_id, cupom.user == user.id).first()
+    find_order = session.query(order).filter(order.id == order_id).first()
+    if not find_coupon:
+        raise HTTPException(status_code=400, detail="Coupon not found")
+    elif not find_order:
+        raise HTTPException(status_code=400, detail="Order not found")
+    elif not cupom.is_valid(find_coupon.valid_until):
+        raise HTTPException(status_code=400, detail="expired coupon")
+
+    find_order.price = find_order.price + (find_coupon.discount * find_order.price)
+    session.commit()
+    return {"message": "Coupon used successfully."}
+
+
+@order_routes.get("order/view_my_order")
 async def view_my_order(user_id: int, session: Session = Depends(get_session),
                         user: User = Depends(verify_token)):
     order_user = session.query(order).filter(order.user == user_id).all()
