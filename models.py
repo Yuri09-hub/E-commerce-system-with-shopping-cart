@@ -1,9 +1,10 @@
+from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, Relationship
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
 import secrets
-from datetime import timedelta, datetime
-
+from datetime import timezone, datetime
+from dependecies import get_session
 db = create_engine("sqlite:///database.db")
 
 base = declarative_base()
@@ -12,17 +13,43 @@ base = declarative_base()
 class Product(base):
     __tablename__ = "products"
 
-    code_product = Column("Product_Code", Integer, primary_key=True)
+    id = Column("id", Integer, primary_key=True)
     price = Column("price", Float, nullable=False)
     name = Column("product_name", String, nullable=False)
     description = Column("Description", String)
-    stock = Column("Stock", Integer, nullable=False)
 
-    def __init__(self, price, name, stock, description=""):
+    def __init__(self, price, name, description=""):
         self.price = price
         self.name = name
         self.description = description
-        self.stock = stock
+
+
+class product_entry(base):
+    __tablename__ = "product_entries"
+
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
+    product = Column("product_id", ForeignKey("products.id"), nullable=False)
+    amount = Column("amount", Integer, nullable=False)
+    date = Column("date", DateTime, nullable=False)
+
+    def __init__(self, product, amount, date):
+        self.product = product
+        self.amount = amount
+        self.date = date
+
+
+class product_output(base):
+    __tablename__ = "product_outputs"
+
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
+    product = Column("product_id", ForeignKey("products.id"))
+    amount = Column("amount", Integer, nullable=False)
+    date = Column("date", DateTime, nullable=False)
+
+    def __init__(self, product, amount, date):
+        self.product = product
+        self.amount = amount
+        self.date = date
 
 
 #User
@@ -55,7 +82,7 @@ class User(base):
 class order(base):
     __tablename__ = "orders"
 
-    id = Column("id_order", Integer, primary_key=True, autoincrement=True)
+    id = Column("id", Integer, primary_key=True, autoincrement=True)
     user = Column("user_id", ForeignKey("users.id"))
     price = Column("total_price", Float)
     status = Column("Status", String, nullable=False)
@@ -78,6 +105,7 @@ class cart(base):
 
     id = Column("id_cart", Integer, primary_key=True, autoincrement=True)
     user = Column("user", ForeignKey("users.id"))
+    product_id = Column("product_id", ForeignKey("products.id"))
     product = Column("Product_name", String)
     amount = Column("amount", Integer)
     unit_price = Column("unit_price", Float)
@@ -103,11 +131,10 @@ class cupom(base):
         self.valid_until = valid_until
         self.user = user
 
-    def is_valid(self):
-        now = datetime.now()
-        if not self.valid_until:
-            return False
-        elif self.valid_until <= now:
+    @staticmethod
+    def is_valid(valid_until):
+        now = datetime.now(timezone.utc)
+        if not valid_until <= now:
             return False
         return True
 

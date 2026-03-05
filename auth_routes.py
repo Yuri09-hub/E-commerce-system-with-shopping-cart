@@ -3,7 +3,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from schemas import UserSchema, LoginSchema
 from sqlalchemy.orm import Session
 from models import User
-from dependecies import get_session, verify_token, verify_province
+from dependecies import get_session, verify_token, validate_province
 from main import becrypt_context, ALGORITHM, ACCESS_TOKEN_EXPIRE_MINUTE, SECRET_KEY
 from re import compile
 from jose import jwt
@@ -12,7 +12,7 @@ from datetime import timedelta, datetime, timezone
 auth_routes = APIRouter(prefix="/auth", tags=["Auth"])
 
 
-def verify_email(email):
+def validate_email(email):
     check = compile(".@gmail.com")
     check2 = check.findall(email)
     if check2:
@@ -21,7 +21,7 @@ def verify_email(email):
         return False
 
 
-def verify_number(phone):
+def validate_number(phone):
     check3 = compile(r"\D")
     check4 = check3.findall(phone)
     if not check4 and len(phone) == 9:
@@ -57,20 +57,25 @@ async def create_account(user_schemas: UserSchema, session: Session = Depends(ge
     user = session.query(User).filter(user_schemas.email == User.email).first()
     if user:
         raise HTTPException(status_code=400, detail="User already registered")
-    else:
-        if (verify_email(user_schemas.email) and verify_number(user_schemas.phone) and
-                verify_province(user_schemas.province.title())):
 
-            password_crypt = becrypt_context.hash(user_schemas.password)
-            new_user = User(user_schemas.name.title(), user_schemas.email, password_crypt,
-                            user_schemas.street.title(), user_schemas.city,
-                            user_schemas.province.title(), user_schemas.phone,
-                            user_schemas.active, user_schemas.admin)
-            session.add(new_user)
-            session.commit()
-            return {"message": f"Account created successfully. Email: {user_schemas.email}"}
-        else:
-            raise HTTPException(status_code=400, detail="Bad Request")
+    if not validate_email(user_schemas.email):
+        raise HTTPException(status_code=400, detail="Email is not valid")
+    elif not validate_number(user_schemas.phone):
+        raise HTTPException(status_code=400, detail="Phone number is not valid")
+    elif not validate_province(user_schemas.province):
+        raise HTTPException(status_code=400, detail="Province is not valid")
+
+    password_crypt = becrypt_context.hash(user_schemas.password)
+    new_user = User(user_schemas.name.title(), user_schemas.email, password_crypt,
+                    user_schemas.street.title(), user_schemas.city,
+                    user_schemas.province.title(), user_schemas.phone,
+                    user_schemas.active)
+    session.add(new_user)
+    user = session.query(User).filter(User.id == 1).first()
+    if user:
+        user.admin = True
+    session.commit()
+    return {"message": f"Account created successfully. Email: {user_schemas.email}"}
 
 
 @auth_routes.post("/login")

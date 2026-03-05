@@ -23,7 +23,10 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login-form")
 from auth_routes import auth_routes
 from order_routes import order_routes
 from product_routes import product_routes
+from customer_routes import customer_router
 
-app.include_router(auth_routes)
-app.include_router(order_routes)
 app.include_router(product_routes)
+app.include_router(auth_routes)
+app.include_router(customer_router)
+app.include_router(order_routes)
+

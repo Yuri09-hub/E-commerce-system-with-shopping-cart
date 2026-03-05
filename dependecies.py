@@ -30,7 +30,7 @@ def verify_token(token: str = Depends(oauth2_scheme), session: Session = Depends
         return user
 
 
-def verify_province(province):
+def validate_province(province):
     province_angola = [
         "Bengo",
         "Benguela", "Bié", "Cabinda",

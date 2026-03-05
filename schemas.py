@@ -11,7 +11,6 @@ class UserSchema(BaseModel):
     province: str
     phone: str
     active: Optional[bool]
-    admin: Optional[bool]
 
     class Config:
         from_attributes = True
@@ -21,7 +20,6 @@ class productSchema(BaseModel):
     price: float
     name: str
     description: str
-    stock: int
 
     class Config:
         from_attributes = True
