@@ -1,10 +1,8 @@
-from fastapi import Depends
 from sqlalchemy import create_engine
 from sqlalchemy.orm import declarative_base, Relationship
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
 import secrets
 from datetime import timezone, datetime
-from dependecies import get_session
 db = create_engine("sqlite:///database.db")
 
 base = declarative_base()

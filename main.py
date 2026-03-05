@@ -1,9 +1,8 @@
 from fastapi import FastAPI
 from passlib.context import CryptContext
 from fastapi.security import OAuth2PasswordBearer
-import os
+import os, sys
 from dotenv import load_dotenv
-
 
 load_dotenv()
 
@@ -14,7 +13,6 @@ SECRET_KEY = os.getenv("SECRET_KEY")
 #jwt
 ALGORITHM = os.getenv("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTE = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTE"))
-
 
 becrypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
@@ -29,4 +27,3 @@ app.include_router(product_routes)
 app.include_router(auth_routes)
 app.include_router(customer_router)
 app.include_router(order_routes)
-
