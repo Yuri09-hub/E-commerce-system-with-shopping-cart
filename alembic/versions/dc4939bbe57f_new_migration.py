@@ -1,8 +1,8 @@
-"""renew Migration
+"""New Migration
 
-Revision ID: 56dad8d8ab6e
+Revision ID: dc4939bbe57f
 Revises: 
-Create Date: 2026-03-05 15:34:14.218206
+Create Date: 2026-03-05 18:06:03.739175
 
 """
 from typing import Sequence, Union
@@ -12,7 +12,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision: str = '56dad8d8ab6e'
+revision: str = 'dc4939bbe57f'
 down_revision: Union[str, Sequence[str], None] = None
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
@@ -24,7 +24,7 @@ def upgrade() -> None:
     op.create_table('products',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('price', sa.Float(), nullable=False),
-    sa.Column('product_name', sa.String(), nullable=False),
+    sa.Column('name', sa.String(), nullable=False),
     sa.Column('Description', sa.String(), nullable=True),
     sa.PrimaryKeyConstraint('id')
     )
@@ -59,6 +59,7 @@ def upgrade() -> None:
     sa.Column('user', sa.Integer(), nullable=True),
     sa.Column('discount', sa.Float(), nullable=False),
     sa.Column('valid_until', sa.DateTime(), nullable=False),
+    sa.Column('status', sa.String(), nullable=False),
     sa.ForeignKeyConstraint(['user'], ['users.id'], ),
     sa.PrimaryKeyConstraint('id_cupom')
     )
@@ -73,6 +74,7 @@ def upgrade() -> None:
     )
     op.create_table('product_entries',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('product', sa.String(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=False),
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('date', sa.DateTime(), nullable=False),
@@ -81,6 +83,7 @@ def upgrade() -> None:
     )
     op.create_table('product_outputs',
     sa.Column('id', sa.Integer(), autoincrement=True, nullable=False),
+    sa.Column('product', sa.String(), nullable=False),
     sa.Column('product_id', sa.Integer(), nullable=True),
     sa.Column('amount', sa.Integer(), nullable=False),
     sa.Column('date', sa.DateTime(), nullable=False),

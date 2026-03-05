@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from pyexpat.errors import messages
+
 
 from models import User, cart, order, product_output, cupom
 from sqlalchemy.orm import Session
@@ -10,10 +10,10 @@ order_routes = APIRouter(prefix="/orders", tags=["Orders"])
 
 
 @order_routes.post("/order/Creat_Order")
-async def Creat_Order(id_cart, session: Session = Depends(get_session),
+async def Creat_Order(id_user, session: Session = Depends(get_session),
                       user: User = Depends(verify_token)):
     price = 0
-    item_order = session.query(cart).filter(cart.id == id_cart).all()
+    item_order = session.query(cart).filter(cart.user == id_user).all()
     if not item_order:
         raise HTTPException(status_code=400, detail="item(s) not found")
 
@@ -25,7 +25,6 @@ async def Creat_Order(id_cart, session: Session = Depends(get_session),
                       freight=calculate_freight(user.province))
     session.add(new_order)
 
-    session.query(cart).filter(cart.user == user.id).delete()
     session.commit()
     orders = session.query(order).filter(order.status == "PENDING").all()
     return {"message": "Order created",
@@ -45,10 +44,12 @@ async def use_coupon(cupom_id: int, code: str, order_id, session: Session = Depe
         raise HTTPException(status_code=400, detail="Coupon not found")
     elif not find_order:
         raise HTTPException(status_code=400, detail="Order not found")
+    elif find_coupon.status == "USED":
+        raise HTTPException(status_code=400, detail="Coupon used")
     elif not cupom.is_valid(find_coupon.valid_until):
         find_coupon.status = "EXPIRED"
         session.commit()
-        raise HTTPException(status_code=400, detail="expired coupon")
+        raise HTTPException(status_code=400, detail="Expired coupon")
 
     find_order.price = find_order.price + (find_coupon.discount * find_order.price)
     find_coupon.status = "USED"
@@ -76,13 +77,16 @@ async def finalize(ordr_id: int, session: Session = Depends(get_session)):
         raise HTTPException(status_code=400, detail="Order not found")
 
     cart_item = session.query(cart).filter(cart.user == order_user.user).all()
-    if cart_item:
-        for item in cart_item:
-            today = datetime.now(timezone.utc)
-            out = product_output(product_id=item.product_id,
-                                 amount=item.amount,
-                                 date=today)
-            session.add(out)
+    if not cart_item:
+        raise HTTPException(status_code=400, detail=" item(s) not found")
+
+    for item in cart_item:
+        today = datetime.now(timezone.utc)
+        out = product_output(product_id=item.product_id,
+                             amount=item.amount,
+                             date=today)
+        session.add(out)
+        session.delete(item)
 
     order_user.status = "FINALIZED"
     mesg = f"Order successfully finalized"
@@ -97,7 +101,7 @@ async def finalize(ordr_id: int, session: Session = Depends(get_session)):
         session.add(new_cupom)
         mesg = f"Order successfully finalized,Congratulations! " \
                f"You've won a 2% discount coupon valid until {deadline}."
-        
+
     session.commit()
     return {"message": mesg}
 

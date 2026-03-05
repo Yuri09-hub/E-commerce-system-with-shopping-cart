@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from schemas import productSchema
 from dependecies import get_session, verify_token
 from sqlalchemy.orm import Session
-from models import Product, User, product_entry
+from models import Product, User, product_entry, cupom
 from datetime import datetime, timezone
 
 product_routes = APIRouter(prefix="/product", tags=["Product"])
@@ -14,7 +14,7 @@ async def add_product(amount, product_schemas: productSchema, user: User = Depen
     if not user.admin:
         raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
 
-    product = Product(price=product_schemas.price, name=product_schemas.name,
+    product = Product(price=product_schemas.price, name=product_schemas.name.title(),
                       description=product_schemas.description)
     session.add(product)
     session.flush()
@@ -68,8 +68,8 @@ async def add_stock(id_product, amount, user: User = Depends(verify_token),
 
 
 @product_routes.get("product/search_product")
-async def search_product(id_product, session: Session = Depends(get_session)):
-    find_product = session.query(Product).filter(Product.id == id_product).first()
+async def search_product(id_product: int, name: str, session: Session = Depends(get_session)):
+    find_product = session.query(Product).filter(Product.id == id_product, Product.name == name.title()).first()
     if not find_product:
         raise HTTPException(status_code=400, detail="Product not found.")
     return {"product": find_product}
@@ -86,3 +86,11 @@ async def delete_product(id_product, user: User = Depends(verify_token), session
     session.delete(product)
     session.commit()
     return {"message": "Product removed successfully"}
+
+
+@product_routes.get("product/coupon_list")
+async def coupon_list(session: Session = Depends(get_session),user: User = Depends(verify_token)):
+    if not user.admin:
+        raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
+    coupon = session.query(cupom).all()
+    return {"coupons": coupon}

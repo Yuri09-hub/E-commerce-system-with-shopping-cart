@@ -14,7 +14,7 @@ class Product(base):
 
     id = Column("id", Integer, primary_key=True)
     price = Column("price", Float, nullable=False)
-    name = Column("product_name", String, nullable=False)
+    name = Column("name", String, nullable=False)
     description = Column("Description", String)
 
     def __init__(self, price, name, description=""):
@@ -27,6 +27,7 @@ class product_entry(base):
     __tablename__ = "product_entries"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
+    product = Column("product", String, nullable=False)
     product_id = Column("product_id", ForeignKey("products.id"), nullable=False)
     amount = Column("amount", Integer, nullable=False)
     date = Column("date", DateTime, nullable=False)
@@ -41,6 +42,7 @@ class product_output(base):
     __tablename__ = "product_outputs"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
+    product = Column("product", String, nullable=False)
     product_id = Column("product_id", ForeignKey("products.id"))
     amount = Column("amount", Integer, nullable=False)
     date = Column("date", DateTime, nullable=False)

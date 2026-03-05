@@ -15,8 +15,10 @@ async def add_item_Cart(cart_schema: cartSchema, session: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Product not found")
     entry = 0
     output = 0
-    verify_product1 = session.query(product_entry).filter(product_entry.product_id == item.id).all()
-    verify_product2 = session.query(product_output).filter(product_output.product_id == item.id).all()
+    verify_product1 = session.query(product_entry).filter(product_entry.product_id == item.id,
+                                                          product_entry.product == item.name).all()
+    verify_product2 = session.query(product_output).filter(product_output.product_id == item.id,
+                                                           product_output.product == item.name).all()
     for amount1 in verify_product1:
         entry += amount1.amount
     for amount2 in verify_product2:
