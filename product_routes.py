@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from models import Product, User, product_entry, product_output
 from datetime import datetime, timezone
 
-product_routes = APIRouter(prefix="/product", tags=["product"])
+product_routes = APIRouter(prefix="/product", tags=["Product"])
 
 
 @product_routes.post("/add_product")
@@ -16,9 +16,11 @@ async def add_product(amount, product_schemas: productSchema, user: User = Depen
 
     product = Product(price=product_schemas.price, name=product_schemas.name,
                       description=product_schemas.description)
-    new_entry = product_entry(product=product.id, amount=amount, date=datetime.now(timezone.utc))
-
     session.add(product)
+    session.flush()
+
+    new_entry = product_entry(product_id=product.id, amount=amount, date=datetime.now(timezone.utc))
+
     session.add(new_entry)
     session.commit()
     return {"message": "Product added successfully"}

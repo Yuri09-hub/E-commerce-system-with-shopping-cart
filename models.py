@@ -3,6 +3,7 @@ from sqlalchemy.orm import declarative_base, Relationship
 from sqlalchemy import Column, Integer, String, Float, ForeignKey, Boolean, DateTime
 import secrets
 from datetime import timezone, datetime
+
 db = create_engine("sqlite:///database.db")
 
 base = declarative_base()
@@ -26,26 +27,21 @@ class product_entry(base):
     __tablename__ = "product_entries"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
-    product = Column("product_id", ForeignKey("products.id"), nullable=False)
+    product_id = Column("product_id", ForeignKey("products.id"), nullable=False)
     amount = Column("amount", Integer, nullable=False)
     date = Column("date", DateTime, nullable=False)
-
-    def __init__(self, product, amount, date):
-        self.product = product
-        self.amount = amount
-        self.date = date
 
 
 class product_output(base):
     __tablename__ = "product_outputs"
 
     id = Column("id", Integer, primary_key=True, autoincrement=True)
-    product = Column("product_id", ForeignKey("products.id"))
+    product_id = Column("product_id", ForeignKey("products.id"))
     amount = Column("amount", Integer, nullable=False)
     date = Column("date", DateTime, nullable=False)
 
-    def __init__(self, product, amount, date):
-        self.product = product
+    def __init__(self, product_id, amount, date):
+        self.product_id = product_id
         self.amount = amount
         self.date = date
 
@@ -108,11 +104,12 @@ class cart(base):
     amount = Column("amount", Integer)
     unit_price = Column("unit_price", Float)
 
-    def __int__(self, product, amount, unit_price, user):
+    def __int__(self, product, amount, unit_price, user,product_id ):
         self.product = product
         self.amount = amount
         self.unit_price = unit_price
         self.user = user
+        self.product_id = product_id
 
 
 class cupom(base):

@@ -47,11 +47,6 @@ def authenticate_user(email, password, session: Session = Depends(get_session)):
         return user
 
 
-@auth_routes.get("/")
-async def auth():
-    return {"message": "Auth route created"}
-
-
 @auth_routes.post("/create_account")
 async def create_account(user_schemas: UserSchema, session: Session = Depends(get_session)):
     user = session.query(User).filter(user_schemas.email == User.email).first()
@@ -62,15 +57,15 @@ async def create_account(user_schemas: UserSchema, session: Session = Depends(ge
         raise HTTPException(status_code=400, detail="Email is not valid")
     elif not validate_number(user_schemas.phone):
         raise HTTPException(status_code=400, detail="Phone number is not valid")
-    elif not validate_province(user_schemas.province):
+    elif not validate_province(user_schemas.province.title()):
         raise HTTPException(status_code=400, detail="Province is not valid")
 
     password_crypt = becrypt_context.hash(user_schemas.password)
     new_user = User(user_schemas.name.title(), user_schemas.email, password_crypt,
-                    user_schemas.street.title(), user_schemas.city,
-                    user_schemas.province.title(), user_schemas.phone,
-                    user_schemas.active)
+                    user_schemas.street.title(), user_schemas.city.title(),
+                    user_schemas.province.title(), user_schemas.phone)
     session.add(new_user)
+    session.commit()
     user = session.query(User).filter(User.id == 1).first()
     if user:
         user.admin = True

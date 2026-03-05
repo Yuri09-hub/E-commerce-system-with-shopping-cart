@@ -10,7 +10,6 @@ class UserSchema(BaseModel):
     city: str
     province: str
     phone: str
-    active: Optional[bool]
 
     class Config:
         from_attributes = True
@@ -26,6 +25,7 @@ class productSchema(BaseModel):
 
 
 class cartSchema(BaseModel):
+    id: int
     amount: int
 
     class Config:

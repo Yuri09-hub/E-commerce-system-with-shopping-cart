@@ -63,4 +63,4 @@ def calculate_freight(province):
     if province in fees:
         return fees.get(province)
     else:
-        return None
+        raise HTTPException(status_code=400,detail="unknown province")
