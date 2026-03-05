@@ -1,4 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends
+from pyexpat.errors import messages
+
 from models import User, cart, order, product_output, cupom
 from sqlalchemy.orm import Session
 from dependecies import verify_token, get_session, calculate_freight
@@ -25,7 +27,7 @@ async def Creat_Order(id_cart, session: Session = Depends(get_session),
 
     session.query(cart).filter(cart.user == user.id).delete()
     session.commit()
-    orders = session.query(order).all()
+    orders = session.query(order).filter(order.status == "PENDING").all()
     return {"message": "Order created",
             "user": user.id,
             "name": user.name,
@@ -44,9 +46,12 @@ async def use_coupon(cupom_id: int, code: str, order_id, session: Session = Depe
     elif not find_order:
         raise HTTPException(status_code=400, detail="Order not found")
     elif not cupom.is_valid(find_coupon.valid_until):
+        find_coupon.status = "EXPIRED"
+        session.commit()
         raise HTTPException(status_code=400, detail="expired coupon")
 
     find_order.price = find_order.price + (find_coupon.discount * find_order.price)
+    find_coupon.status = "USED"
     session.commit()
     return {"message": "Coupon used successfully."}
 
@@ -66,27 +71,35 @@ async def view_my_order(user_id: int, session: Session = Depends(get_session),
 @order_routes.post("/order/finalize")
 async def finalize(ordr_id: int, session: Session = Depends(get_session)):
     order_user = session.query(order).filter(order.id == ordr_id).first()
+
     if not order_user:
         raise HTTPException(status_code=400, detail="Order not found")
 
     cart_item = session.query(cart).filter(cart.user == order_user.user).all()
     if cart_item:
         for item in cart_item:
-            out = product_output(product_id=item.product_id, amount=item.amount, date=datetime.now(timezone.utc))
+            today = datetime.now(timezone.utc)
+            out = product_output(product_id=item.product_id,
+                                 amount=item.amount,
+                                 date=today)
             session.add(out)
-            session.delete(item)
+
     order_user.status = "FINALIZED"
-    session.commit()
-    user = session.query(order).filter(order.user == order_user.user, order.status == "FINALIZED").count()
+    mesg = f"Order successfully finalized"
+    session.flush()
+
+    user = session.query(order).filter(order.user == order_user.user,
+                                       order.status == "FINALIZED").count()
     if user and user % 5 == 0:
         deadline = (datetime.now(timezone.utc) + timedelta(days=4))
         code = cupom.generate_cupom()
         new_cupom = cupom(code=code, discount=0.02, valid_until=deadline, user=order_user.user)
         session.add(new_cupom)
-        return {"message": f"Order successfully finalized,Congratulations! "
-                           f"You've won a 2% discount coupon valid until {deadline}."}
-
-    return {"message": f"Order successfully finalized"}
+        mesg = f"Order successfully finalized,Congratulations! " \
+               f"You've won a 2% discount coupon valid until {deadline}."
+        
+    session.commit()
+    return {"message": mesg}
 
 
 @order_routes.post("/order/cancel/order")

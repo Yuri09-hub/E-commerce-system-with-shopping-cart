@@ -124,12 +124,14 @@ class cupom(base):
     user = Column("user", ForeignKey("users.id"))
     discount = Column("discount", Float, nullable=False)
     valid_until = Column("valid_until", DateTime, nullable=False)
+    status = Column("status", String, nullable=False)
 
     def __init__(self, code, discount, valid_until, user):
         self.code = code
         self.discount = discount
         self.valid_until = valid_until
         self.user = user
+        self.status = "PENDING"
 
     @staticmethod
     def is_valid(valid_until):
