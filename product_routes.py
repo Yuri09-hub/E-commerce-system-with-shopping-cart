@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from schemas import productSchema
 from dependecies import get_session, verify_token
 from sqlalchemy.orm import Session
-from models import Product, User, product_entry, product_output
+from models import Product, User, product_entry
 from datetime import datetime, timezone
 
 product_routes = APIRouter(prefix="/product", tags=["Product"])
@@ -61,7 +61,7 @@ async def add_stock(id_product, amount, user: User = Depends(verify_token),
     elif not user.admin:
         raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
 
-    entry = product_entry(product=find_product.id, amount=amount, date=datetime.now(timezone.utc))
+    entry = product_entry(product_id=find_product.id, amount=amount, date=datetime.now(timezone.utc))
     session.add(entry)
     session.commit()
     return {"message": "Product added successfully"}

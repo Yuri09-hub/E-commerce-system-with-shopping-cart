@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException
 from schemas import cartSchema
 from sqlalchemy.orm import Session
-from models import User, Product, cart, cupom, product_output, product_entry
+from models import User, Product, cart, product_output, product_entry
 from dependecies import verify_token, get_session
 
 customer_router = APIRouter(prefix="/customer", tags=["Customer"])
@@ -15,8 +15,8 @@ async def add_item_Cart(cart_schema: cartSchema, session: Session = Depends(get_
         raise HTTPException(status_code=400, detail="Product not found")
     entry = 0
     output = 0
-    verify_product1 = session.query(product_entry).filter(product_entry.product_id == item.product_id).all()
-    verify_product2 = session.query(product_output).filter(product_output.product_id == item.product_id).all()
+    verify_product1 = session.query(product_entry).filter(product_entry.product_id == item.id).all()
+    verify_product2 = session.query(product_output).filter(product_output.product_id == item.id).all()
     for amount1 in verify_product1:
         entry += amount1.amount
     for amount2 in verify_product2:

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
-from models import User, cart, order,product_output, cupom
+from models import User, cart, order, product_output, cupom
 from sqlalchemy.orm import Session
 from dependecies import verify_token, get_session, calculate_freight
 from datetime import timezone, datetime, timedelta
@@ -8,7 +8,7 @@ order_routes = APIRouter(prefix="/orders", tags=["Orders"])
 
 
 @order_routes.post("/order/Creat_Order")
-async def Creat_Order(id_cart,session: Session = Depends(get_session),
+async def Creat_Order(id_cart, session: Session = Depends(get_session),
                       user: User = Depends(verify_token)):
     price = 0
     item_order = session.query(cart).filter(cart.id == id_cart).all()
@@ -19,7 +19,7 @@ async def Creat_Order(id_cart,session: Session = Depends(get_session),
         price += (item.unit_price * item.amount)
     price += calculate_freight(user.province)
 
-    new_order = order(user=item_order.user, price=price,
+    new_order = order(user=item_order[0].user, price=price,
                       freight=calculate_freight(user.province))
     session.add(new_order)
 
@@ -72,7 +72,7 @@ async def finalize(ordr_id: int, session: Session = Depends(get_session)):
     cart_item = session.query(cart).filter(cart.user == order_user.user).all()
     if cart_item:
         for item in cart_item:
-            out = product_output(product=item.product_id, amount=item.amount, date=datetime.now(timezone.utc))
+            out = product_output(product_id=item.product_id, amount=item.amount, date=datetime.now(timezone.utc))
             session.add(out)
             session.delete(item)
     order_user.status = "FINALIZED"
