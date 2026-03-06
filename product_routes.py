@@ -89,7 +89,7 @@ async def delete_product(id_product, user: User = Depends(verify_token), session
 
 
 @product_routes.get("product/coupon_list")
-async def coupon_list(session: Session = Depends(get_session),user: User = Depends(verify_token)):
+async def coupon_list(session: Session = Depends(get_session), user: User = Depends(verify_token)):
     if not user.admin:
         raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
     coupon = session.query(cupom).all()

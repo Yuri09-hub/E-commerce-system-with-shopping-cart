@@ -10,7 +10,8 @@ customer_router = APIRouter(prefix="/customer", tags=["Customer"])
 @customer_router.post("/Add_Item")
 async def add_item_Cart(cart_schema: cartSchema, session: Session = Depends(get_session),
                         user: User = Depends(verify_token)):
-    item = session.query(Product).filter(Product.id == cart_schema.id).first()
+    item = session.query(Product).filter(Product.id == cart_schema.id,
+                                         Product.name == cart_schema.product).first()
     if not item:
         raise HTTPException(status_code=400, detail="Product not found")
     entry = 0
@@ -47,7 +48,7 @@ async def remover_item_cart(cart_id: int, session: Session = Depends(get_session
                             user: User = Depends(verify_token)):
     cart_item = session.query(cart).filter(cart.id == cart_id).first()
     if not cart_item:
-        raise HTTPException(status_code=400, detail="product not found or user whithout permission")
+        raise HTTPException(status_code=400, detail="product not found or user without permission")
     elif not user.admin or cart_item.user != user:
         raise HTTPException(status_code=400, detail="You do not have permission to make this change")
 

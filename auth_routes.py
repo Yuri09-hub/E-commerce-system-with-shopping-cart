@@ -65,12 +65,13 @@ async def create_account(user_schemas: UserSchema, session: Session = Depends(ge
                     user_schemas.street.title(), user_schemas.city.title(),
                     user_schemas.province.title(), user_schemas.phone)
     session.add(new_user)
-    session.commit()
+    session.flush()
+
     user = session.query(User).filter(User.id == 1).first()
     if user:
         user.admin = True
     session.commit()
-    return {"message": f"Account created successfully. Email: {user_schemas.email}"}
+    return {"message": f"Account created successfully."}
 
 
 @auth_routes.post("/login")
@@ -88,7 +89,7 @@ async def login(login_schemas: LoginSchema, session: Session = Depends(get_sessi
         }
 
 
-@auth_routes.post("/login-form", response_model=None)
+@auth_routes.post("/login-form")
 async def login_form(form_data: OAuth2PasswordRequestForm = Depends(), session: Session = Depends(get_session)):
     user = authenticate_user(form_data.username, form_data.password, session)
     if not user:

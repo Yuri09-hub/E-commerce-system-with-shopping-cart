@@ -1,6 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends
 
-
 from models import User, cart, order, product_output, cupom
 from sqlalchemy.orm import Session
 from dependecies import verify_token, get_session, calculate_freight
@@ -9,9 +8,9 @@ from datetime import timezone, datetime, timedelta
 order_routes = APIRouter(prefix="/orders", tags=["Orders"])
 
 
-@order_routes.post("/order/Creat_Order")
-async def Creat_Order(id_user, session: Session = Depends(get_session),
-                      user: User = Depends(verify_token)):
+@order_routes.post("/order/Create_Order")
+async def Create_Order(id_user, session: Session = Depends(get_session),
+                       user: User = Depends(verify_token)):
     price = 0
     item_order = session.query(cart).filter(cart.user == id_user).all()
     if not item_order:
@@ -89,7 +88,7 @@ async def finalize(ordr_id: int, session: Session = Depends(get_session)):
         session.delete(item)
 
     order_user.status = "FINALIZED"
-    mesg = f"Order successfully finalized"
+    msg = f"Order successfully finalized"
     session.flush()
 
     user = session.query(order).filter(order.user == order_user.user,
@@ -99,11 +98,11 @@ async def finalize(ordr_id: int, session: Session = Depends(get_session)):
         code = cupom.generate_cupom()
         new_cupom = cupom(code=code, discount=0.02, valid_until=deadline, user=order_user.user)
         session.add(new_cupom)
-        mesg = f"Order successfully finalized,Congratulations! " \
-               f"You've won a 2% discount coupon valid until {deadline}."
+        msg = f"Order successfully finalized,Congratulations! " \
+              f"You've won a 2% discount coupon valid until {deadline}."
 
     session.commit()
-    return {"message": mesg}
+    return {"message": msg}
 
 
 @order_routes.post("/order/cancel/order")

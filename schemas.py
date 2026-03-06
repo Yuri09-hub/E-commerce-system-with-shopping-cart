@@ -25,6 +25,7 @@ class productSchema(BaseModel):
 
 
 class cartSchema(BaseModel):
+    product: str
     id: int
     amount: int
 
