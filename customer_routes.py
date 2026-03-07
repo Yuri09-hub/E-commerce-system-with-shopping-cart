@@ -19,17 +19,20 @@ async def add_item_Cart(cart_schema: cartSchema, session: Session = Depends(get_
     verify_product1 = session.query(product_entry).filter(product_entry.product_id == item.id,
                                                           product_entry.product == item.name).all()
     verify_product2 = session.query(product_output).filter(product_output.product_id == item.id,
-                                                           product_output.product == item.name).all()
-    for amount1 in verify_product1:
-        entry += amount1.amount
-    for amount2 in verify_product2:
-        output += amount2.amount
-    stock = entry - output
-    if stock == 0:
+                                                          product_output.product == item.name).all()
+    if not verify_product1:
         raise HTTPException(status_code=400, detail="Product out of stock")
-    elif stock < cart_schema.amount:
-        raise HTTPException(status_code=400,
-                            detail=f"Insufficient stock. Available: {stock}, requested: {cart_schema.amount}.")
+    if verify_product2:
+        for amount1 in verify_product1:
+            entry += amount1.amount
+        for amount2 in verify_product2:
+            output += amount2.amount
+        stock = entry - output
+        if stock == 0:
+            raise HTTPException(status_code=400, detail="Product out of stock")
+        elif stock < cart_schema.amount:
+            raise HTTPException(status_code=400,
+                                detail=f"Insufficient stock. Available: {stock}, requested: {cart_schema.amount}.")
 
     cart_item = cart(product=item.name, amount=cart_schema.amount, unit_price=item.price, user=user.id,
                      product_id=item.id)
