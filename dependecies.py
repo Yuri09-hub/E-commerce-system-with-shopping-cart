@@ -35,23 +35,23 @@ def validate_province(province):
         "Bengo",
         "Benguela", "Bié", "Cabinda",
         "Cuando", "Cuanza Norte", "Cuanza Sul",
-        "Cubango",  # Nova província (ex-Cuando Cubango)
+        "Cubango",
         "Cunene", "Huambo", "Huíla",
-        "Ícolo E Bengo",  # Nova província (ex-Luanda)
+        "Ícolo E Bengo",
         "Luanda", "Lunda Norte", "Lunda Sul",
         "Malanje", "Moxico",
-        "Moxico Leste",  # Nova província (ex-Moxico)
+        "Moxico Leste",
         "Namibe", "Uíge",
         "Zaire"]
     if province in province_angola:
         return province
     else:
-        return None
+        raise HTTPException(status_code=400, detail="unknown province")
 
 
 def calculate_freight(province):
     fees = {
-        "Luanda": 1500, "Icolo e Bengo": 2500, "Bengo": 3000,
+        "Luanda": 1500, "Ícolo E Bengo": 2500, "Bengo": 3000,
         "Benguela": 4000, "Bié": 4500, "Cabinda": 7500,
         "Cuando": 6500, "Cubango": 6500, "Cuanza Norte": 3500,
         "Cuanza Sul": 3500, "Cunene": 6000, "Huambo": 4500,
@@ -63,4 +63,4 @@ def calculate_freight(province):
     if province in fees:
         return fees.get(province)
     else:
-        raise HTTPException(status_code=400,detail="unknown province")
+        raise HTTPException(status_code=400, detail="unknown province")
