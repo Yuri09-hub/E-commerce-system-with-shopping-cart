@@ -109,3 +109,35 @@ async def user_refresh_token(user: User = Depends(verify_token)):
         "access_token": access_token,
         "token_type": "bearer"
     }
+
+
+@auth_routes.post("/Make_admin")
+def make_admin(user_id: int, session: Session = Depends(get_session), user: User = Depends(verify_token)):
+    if user.id == 1:
+        raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
+
+    find_user = session.query(User).filter(User.id == user_id).first()
+    if not find_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    find_user.admin = True
+
+    return {
+        "message": "User successfully promoted to admin.",
+        "user": find_user.id
+    }
+
+
+@auth_routes.post("/Remove_admin")
+def remove_admin(user_id: int, session: Session = Depends(get_session), user: User = Depends(verify_token)):
+    if user.id == 1:
+        raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
+
+    find_user = session.query(User).filter(User.id == user_id).first()
+    if not find_user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    find_user.admin = False
+    return {"message": "Admin privileges removed successfully",
+            "user": find_user.id
+            }
