@@ -81,7 +81,7 @@ async def delete_product(id_product, user: User = Depends(verify_token), session
     if not product:
         raise HTTPException(status_code=400, detail="Product not found.")
     elif not user.admin:
-        raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
+        raise HTTPException(status_code=400, detail="You do not have permission to make this change.")
 
     session.delete(product)
     session.commit()
