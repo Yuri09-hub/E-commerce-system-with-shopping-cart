@@ -44,7 +44,7 @@ async def update_product(id: int, product_schemas: productSchema, user: User = D
 
 @product_routes.get("product/list_products")
 async def list_products(session: Session = Depends(get_session)):
-    products = session.query(Product).limit(10).offset(10)
+    products = session.query(Product).limit(10).offset(10).all()
 
     return {
         "products": products

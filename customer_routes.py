@@ -58,7 +58,7 @@ async def remover_item_cart(cart_id: int, session: Session = Depends(get_session
 
 @customer_router.get("/view_my_cart")
 async def view_my_cart(session: Session = Depends(get_session), user: User = Depends(verify_token)):
-    Cart_item = session.query(cart).filter(cart.user == user.id).all()
+    Cart_item = session.query(cart).filter(cart.user == user.id).limit(10).offset(0).all()
     return {
         "user": user.id,
         "name": user.name,

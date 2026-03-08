@@ -59,7 +59,7 @@ async def use_coupon(cupom_id: int, code: str, order_id, session: Session = Depe
 @order_routes.get("order/view_my_order")
 async def view_my_order(user_id: int, session: Session = Depends(get_session),
                         user: User = Depends(verify_token)):
-    order_user = session.query(order).filter(order.user == user_id).all()
+    order_user = session.query(order).filter(order.user == user_id).limit(10).offset(0).all()
     if not order_user:
         raise HTTPException(status_code=400, detail="Order not found")
     elif not user.admin or not user.id != user:
