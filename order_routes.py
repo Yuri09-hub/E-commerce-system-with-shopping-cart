@@ -110,7 +110,7 @@ async def cancel_Order(ordr_id: int, session: Session = Depends(get_session),
                        user: User = Depends(verify_token)):
     order_user = session.query(order).filter(order.id == ordr_id).first()
     if not order_user:
-        raise HTTPException(status_code=400, detail="Order not found")
+        raise HTTPException(status_code=404, detail="Order not found")
     elif not user.admin and order_user.user != user:
         raise HTTPException(status_code=400, detail="You do not have permission to make this change.")
     elif order_user.status == "CANCELLED":

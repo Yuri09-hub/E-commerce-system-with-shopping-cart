@@ -33,7 +33,7 @@ async def update_product(id: int, product_schemas: productSchema, user: User = D
         raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
     find_product = session.query(Product).filter(Product.id == id).first()
     if not find_product:
-        raise HTTPException(status_code=400, detail="Product not found.")
+        raise HTTPException(status_code=404, detail="Product not found.")
 
     find_product.name = product_schemas.name
     find_product.price = product_schemas.price
@@ -57,7 +57,7 @@ async def add_stock(id_product, amount, user: User = Depends(verify_token),
     find_product = session.query(Product).filter(Product.id == id_product).first()
 
     if not find_product:
-        raise HTTPException(status_code=400, detail="Product not found.")
+        raise HTTPException(status_code=404, detail="Product not found.")
     elif not user.admin:
         raise HTTPException(status_code=401, detail="You do not have permission to make this change.")
 
@@ -71,7 +71,7 @@ async def add_stock(id_product, amount, user: User = Depends(verify_token),
 async def search_product(id_product: int, name: str, session: Session = Depends(get_session)):
     find_product = session.query(Product).filter(Product.id == id_product, Product.name == name.title()).first()
     if not find_product:
-        raise HTTPException(status_code=400, detail="Product not found.")
+        raise HTTPException(status_code=404, detail="Product not found.")
     return {"product": find_product}
 
 
@@ -79,7 +79,7 @@ async def search_product(id_product: int, name: str, session: Session = Depends(
 async def delete_product(id_product, user: User = Depends(verify_token), session: Session = Depends(get_session)):
     product = session.query(Product).filter(Product.id == id_product).first()
     if not product:
-        raise HTTPException(status_code=400, detail="Product not found.")
+        raise HTTPException(status_code=404, detail="Product not found.")
     elif not user.admin:
         raise HTTPException(status_code=400, detail="You do not have permission to make this change.")
 
